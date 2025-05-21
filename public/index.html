@@ -60,6 +60,19 @@
     </form>
   </div>
 
+  <!-- 📈 Accuracy Progress Chart -->
+  <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-semibold mb-4">Shooting Accuracy Over Time</h2>
+    <canvas id="progressChart" width="600" height="300"></canvas>
+  </div>
+
+  <!-- 🏀 Zone-based Court Chart -->
+  <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-semibold mb-4">Shot Zones Chart</h2>
+    <div id="zoneChart" class="w-full" style="height: 538px;"></div>
+  </div>
+
+
   <!-- Firebase SDKs -->
   <script type="module">
     // Import Firebase modules
@@ -126,6 +139,96 @@
       }
     });
   </script>
+
+  <!-- Chart.js for line/area charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Konva.js for interactive basketball court zones -->
+  <script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js"></script>
+
+  <script type="module">
+    const stage = new Konva.Stage({
+      container: 'zoneChart',
+      width: 600,
+      height: 538
+    });
+
+    const layer = new Konva.Layer();
+    stage.add(layer);
+
+    // Load court image
+    const imageObj = new Image();
+    imageObj.src = './assets/court.png'; // adjust path if needed
+
+    imageObj.onload = function () {
+      const court = new Konva.Image({
+        x: 0,
+        y: 0,
+        image: imageObj,
+        width: stage.width(),
+        height: stage.height()
+      });
+
+      layer.add(court);
+
+      // Define zones (adjust positions to match court layout)
+      const zones = [
+  { id: 'Top of Key',     x: 250, y: 67,   w: 100, h: 67 },
+  { id: 'Left Corner',    x: 30,  y: 430,  w: 50,  h: 54 },
+  { id: 'Right Corner',   x: 520, y: 430,  w: 50,  h: 54 },
+  { id: 'Left Wing',      x: 100, y: 202,  w: 80,  h: 67 },
+  { id: 'Right Wing',     x: 420, y: 202,  w: 80,  h: 67 },
+  { id: 'Left Midrange',  x: 160, y: 310,  w: 60,  h: 54 },
+  { id: 'Right Midrange', x: 380, y: 310,  w: 60,  h: 54 },
+  { id: 'Left Baseline',  x: 100, y: 430,  w: 60,  h: 54 },
+  { id: 'Right Baseline', x: 440, y: 430,  w: 60,  h: 54 },
+  { id: 'Paint',          x: 250, y: 269,  w: 100, h: 161 }
+];
+
+
+      zones.forEach(zone => {
+        const rect = new Konva.Rect({
+          x: zone.x,
+          y: zone.y,
+          width: zone.w,
+          height: zone.h,
+          fill: 'rgba(0, 128, 0, 0.3)', // green overlay, semi-transparent
+          stroke: '#fff',
+          strokeWidth: 1,
+          cornerRadius: 4
+        });
+
+        const label = new Konva.Text({
+          x: zone.x,
+          y: zone.y + zone.h / 2 - 10,
+          width: zone.w,
+          align: 'center',
+          text: zone.id,
+          fontSize: 10,
+          fill: '#fff'
+        });
+
+        rect.on('mouseover', () => {
+          document.body.style.cursor = 'pointer';
+          rect.opacity(0.6);
+          layer.draw();
+        });
+
+        rect.on('mouseout', () => {
+          document.body.style.cursor = 'default';
+          rect.opacity(0.3);
+          layer.draw();
+        });
+
+        layer.add(rect);
+        layer.add(label);
+      });
+
+      layer.draw();
+    };
+  </script>
+
+
 
 </body>
 
