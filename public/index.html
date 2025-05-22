@@ -136,7 +136,7 @@
   <!-- <script type="module" src="./session-handler-debug.js"></script> -->
   <script type="module" src="./progress-chart.js"></script>
   <script type="module" src="./ui-render.js"></script>
-  
+
   <script>
     const zoneMap = {
       "3pt": ["Left Corner", "Left Wing 3pt", "Top of Key 3pt", "Right Wing 3pt", "Right Corner"],
@@ -195,6 +195,46 @@
       });
     });
   </script>
+
+  <script type="module">
+    import { renderZonesChart } from './ui-render.js';
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("sessionCheckboxList");
+      const btn = document.getElementById("applyZoneFilter");
+
+      function updateCheckboxList(sessions) {
+        container.innerHTML = "";
+        sessions.forEach(s => {
+          const box = document.createElement("div");
+          box.innerHTML = `
+          <label><input type="checkbox" class="zone-filter" value="${s.id}" checked />
+          ${s.date} – ${s.trainingType}</label>`;
+          container.appendChild(box);
+        });
+      }
+
+      btn.addEventListener("click", () => {
+        const selectedIds = Array.from(document.querySelectorAll(".zone-filter:checked")).map(cb => cb.value);
+        const selectedSessions = window.allSessions.filter(s => selectedIds.includes(s.id));
+        renderZonesChart(selectedSessions);
+      });
+
+      setTimeout(() => {
+        if (window.allSessions) updateCheckboxList(window.allSessions);
+      }, 1000);
+    });
+  </script>
+
+  <!-- Shot Zone Filter UI -->
+  <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-semibold mb-4">🎯 Filter Shot Zones by Session</h2>
+    <div id="sessionCheckboxList" class="space-y-1 text-sm"></div>
+    <button id="applyZoneFilter" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+      Filter Zones
+    </button>
+  </div>
+
 </body>
 
 </html>
