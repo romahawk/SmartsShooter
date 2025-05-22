@@ -1,4 +1,4 @@
-// session-handler.js
+// session-handler.js (with full session loading)
 import { db, auth } from './firebase-setup.js';
 import {
   collection,
@@ -16,6 +16,11 @@ let sortField = "date";
 let sortDirection = "desc";
 let sessions = [];
 
+const zoneMap = {
+  "3pt": ["Left Corner", "Left Wing 3pt", "Top of Key 3pt", "Right Wing 3pt", "Right Corner"],
+  "midrange": ["Left Baseline", "Left Wing", "Free Throw", "Right Wing", "Right Baseline"]
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, (user) => {
     if (!user) return;
@@ -24,19 +29,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("logForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const sessionId = document.getElementById("sessionId").value;
       const date = document.getElementById("date").value;
       const trainingType = document.getElementById("trainingType").value;
+      const zoneType = document.getElementById("zoneType").value;
       const notes = document.getElementById("notes").value;
+      const zoneNames = zoneMap[zoneType] || [];
 
-      const zoneNames = ["Left Corner", "Left Wing", "Top of Key", "Right Wing", "Right Corner"];
       const zones = {};
-
       zoneNames.forEach(zone => {
-        const attemptedInput = document.querySelector(`[name="attempted_${zone}"]`);
-        const madeInput = document.querySelector(`[name="made_${zone}"]`);
-        const attempted = parseInt(attemptedInput?.value) || 0;
-        const made = parseInt(madeInput?.value) || 0;
+        const attempted = parseInt(document.querySelector(`[name="attempted_${zone}"]`)?.value || 0);
+        const made = parseInt(document.querySelector(`[name="made_${zone}"]`)?.value || 0);
         if (attempted > 0 || made > 0) {
           zones[zone] = { attempted, made };
         }
@@ -50,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
           userId: uid,
           date,
           trainingType,
+          zoneType,
           zones,
           accuracy: Number(avgAccuracy),
           notes,
@@ -70,16 +73,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const sessionId = document.getElementById("editSessionId").value;
       const date = document.getElementById("editDate").value;
       const trainingType = document.getElementById("editTrainingType").value;
+      const zoneType = document.getElementById("editZoneType").value;
       const notes = document.getElementById("editNotes").value;
+      const zoneNames = zoneMap[zoneType] || [];
 
-      const zoneNames = ["Left Corner", "Left Wing", "Top of Key", "Right Wing", "Right Corner"];
       const zones = {};
-
       zoneNames.forEach(zone => {
-        const attemptedInput = document.querySelector(`[name="edit_attempted_${zone}"]`);
-        const madeInput = document.querySelector(`[name="edit_made_${zone}"]`);
-        const attempted = parseInt(attemptedInput?.value) || 0;
-        const made = parseInt(madeInput?.value) || 0;
+        const attempted = parseInt(document.querySelector(`[name="edit_attempted_${zone}"]`)?.value || 0);
+        const made = parseInt(document.querySelector(`[name="edit_made_${zone}"]`)?.value || 0);
         if (attempted > 0 || made > 0) {
           zones[zone] = { attempted, made };
         }
@@ -93,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
           userId: uid,
           date,
           trainingType,
+          zoneType,
           zones,
           accuracy: Number(avgAccuracy),
           notes,
@@ -135,21 +137,6 @@ async function loadSessionLog(uid) {
   const snapshot = await getDocs(q);
 
   sessions = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-
-  sessions.sort((a, b) => {
-    let aVal = a[sortField] ?? "";
-    let bVal = b[sortField] ?? "";
-
-    if (sortField === "accuracy") {
-      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
-    }
-    if (typeof aVal === "string") {
-      return sortDirection === "asc"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    }
-    return 0;
-  });
 
   const tbody = document.getElementById("sessionTableBody");
   if (!tbody) return;
@@ -202,13 +189,15 @@ async function loadSessionLog(uid) {
       document.getElementById("editSessionId").value = session.id;
       document.getElementById("editDate").value = session.date;
       document.getElementById("editTrainingType").value = session.trainingType;
+      document.getElementById("editZoneType").value = session.zoneType;
       document.getElementById("editNotes").value = session.notes || "";
 
-      Object.entries(session.zones || {}).forEach(([zone, data]) => {
+      const zoneNames = zoneMap[session.zoneType] || [];
+      zoneNames.forEach(zone => {
         const attemptedInput = document.querySelector(`[name="edit_attempted_${zone}"]`);
         const madeInput = document.querySelector(`[name="edit_made_${zone}"]`);
-        if (attemptedInput) attemptedInput.value = data.attempted;
-        if (madeInput) madeInput.value = data.made;
+        if (attemptedInput) attemptedInput.value = session.zones[zone]?.attempted || 0;
+        if (madeInput) madeInput.value = session.zones[zone]?.made || 0;
       });
 
       document.getElementById("editModal").classList.remove("hidden");

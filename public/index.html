@@ -31,34 +31,16 @@
         </select>
       </div>
 
-      <div id="zoneInputs" class="mt-6 space-y-4">
-        <div class="grid grid-cols-5 gap-4">
-          <div class="text-center font-semibold">Left Corner</div>
-          <div class="text-center font-semibold">Left Wing</div>
-          <div class="text-center font-semibold">Top of Key</div>
-          <div class="text-center font-semibold">Right Wing</div>
-          <div class="text-center font-semibold">Right Corner</div>
-        </div>
-        <div class="grid grid-cols-5 gap-4">
-          <input name="attempted_Left Corner" placeholder="Attempted" class="p-2 border rounded text-center"
-            type="number" />
-          <input name="attempted_Left Wing" placeholder="Attempted" class="p-2 border rounded text-center"
-            type="number" />
-          <input name="attempted_Top of Key" placeholder="Attempted" class="p-2 border rounded text-center"
-            type="number" />
-          <input name="attempted_Right Wing" placeholder="Attempted" class="p-2 border rounded text-center"
-            type="number" />
-          <input name="attempted_Right Corner" placeholder="Attempted" class="p-2 border rounded text-center"
-            type="number" />
-        </div>
-        <div class="grid grid-cols-5 gap-4">
-          <input name="made_Left Corner" placeholder="Made" class="p-2 border rounded text-center" type="number" />
-          <input name="made_Left Wing" placeholder="Made" class="p-2 border rounded text-center" type="number" />
-          <input name="made_Top of Key" placeholder="Made" class="p-2 border rounded text-center" type="number" />
-          <input name="made_Right Wing" placeholder="Made" class="p-2 border rounded text-center" type="number" />
-          <input name="made_Right Corner" placeholder="Made" class="p-2 border rounded text-center" type="number" />
-        </div>
+      <div>
+        <label for="zoneType" class="block font-medium">Zone Type</label>
+        <select id="zoneType" class="w-full border border-gray-300 p-2 rounded" required>
+          <option value="">-- Select Zone Type --</option>
+          <option value="3pt">3pt</option>
+          <option value="midrange">Midrange</option>
+        </select>
       </div>
+
+      <div id="zoneInputs" class="mt-6 space-y-4"></div>
 
       <div>
         <label for="notes" class="block font-medium">Notes</label>
@@ -71,19 +53,15 @@
     </form>
   </div>
 
-  <!-- 📈 Accuracy Progress Chart -->
   <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
     <h2 class="text-xl font-semibold mb-4">Shooting Accuracy Over Time</h2>
     <canvas id="progressChart" width="600" height="300"></canvas>
   </div>
 
-  <!-- 🏀 Zone-based Court Chart -->
   <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
     <h2 class="text-xl font-semibold mb-4">Shot Zones Chart</h2>
     <div id="zoneChart" class="w-full" style="height: 538px;"></div>
   </div>
-
-  <!-- 🗂️ Training Sessions Log -->
 
   <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
     <h2 class="text-xl font-semibold mb-4">📋 Training Session Log</h2>
@@ -99,15 +77,11 @@
             <th class="px-4 py-2">⚙️ Actions</th>
           </tr>
         </thead>
-
-        <tbody id="sessionTableBody" class="divide-y divide-gray-200 bg-white">
-          <!-- Data will be inserted here -->
-        </tbody>
+        <tbody id="sessionTableBody" class="divide-y divide-gray-200 bg-white"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- ✏️ Edit Session Modal -->
   <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg relative">
       <h2 class="text-xl font-semibold mb-4">✏️ Edit Training Session</h2>
@@ -129,38 +103,16 @@
           </select>
         </div>
 
-        <div id="editZoneInputs" class="space-y-4">
-          <div class="grid grid-cols-5 gap-4">
-            <div class="text-center font-semibold">Left Corner</div>
-            <div class="text-center font-semibold">Left Wing</div>
-            <div class="text-center font-semibold">Top of Key</div>
-            <div class="text-center font-semibold">Right Wing</div>
-            <div class="text-center font-semibold">Right Corner</div>
-          </div>
-          <div class="grid grid-cols-5 gap-4">
-            <input name="edit_attempted_Left Corner" placeholder="Attempted" class="p-2 border rounded text-center"
-              type="number" />
-            <input name="edit_attempted_Left Wing" placeholder="Attempted" class="p-2 border rounded text-center"
-              type="number" />
-            <input name="edit_attempted_Top of Key" placeholder="Attempted" class="p-2 border rounded text-center"
-              type="number" />
-            <input name="edit_attempted_Right Wing" placeholder="Attempted" class="p-2 border rounded text-center"
-              type="number" />
-            <input name="edit_attempted_Right Corner" placeholder="Attempted" class="p-2 border rounded text-center"
-              type="number" />
-          </div>
-          <div class="grid grid-cols-5 gap-4">
-            <input name="edit_made_Left Corner" placeholder="Made" class="p-2 border rounded text-center"
-              type="number" />
-            <input name="edit_made_Left Wing" placeholder="Made" class="p-2 border rounded text-center" type="number" />
-            <input name="edit_made_Top of Key" placeholder="Made" class="p-2 border rounded text-center"
-              type="number" />
-            <input name="edit_made_Right Wing" placeholder="Made" class="p-2 border rounded text-center"
-              type="number" />
-            <input name="edit_made_Right Corner" placeholder="Made" class="p-2 border rounded text-center"
-              type="number" />
-          </div>
+        <div>
+          <label for="editZoneType" class="block font-medium">Zone Type</label>
+          <select id="editZoneType" class="w-full border border-gray-300 p-2 rounded" required>
+            <option value="">-- Select Zone Type --</option>
+            <option value="3pt">3pt</option>
+            <option value="midrange">Midrange</option>
+          </select>
         </div>
+
+        <div id="editZoneInputs" class="space-y-4"></div>
 
         <div>
           <label for="editNotes" class="block font-medium">Notes</label>
@@ -177,17 +129,72 @@
     </div>
   </div>
 
-
-  <!-- 🔗 Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js"></script>
-
-  <!-- 🚀 Your Modules -->
   <script type="module" src="./firebase-setup.js"></script>
   <script type="module" src="./session-handler.js"></script>
+  <!-- <script type="module" src="./session-handler-debug.js"></script> -->
   <script type="module" src="./progress-chart.js"></script>
   <script type="module" src="./ui-render.js"></script>
+  
+  <script>
+    const zoneMap = {
+      "3pt": ["Left Corner", "Left Wing 3pt", "Top of Key 3pt", "Right Wing 3pt", "Right Corner"],
+      "midrange": ["Left Baseline", "Left Wing", "Free Throw", "Right Wing", "Right Baseline"]
+    };
 
+    function renderZoneInputs(containerId, zoneNames, prefix = '') {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      const headerRow = document.createElement('div');
+      headerRow.className = "grid grid-cols-5 gap-4";
+      zoneNames.forEach(zone => {
+        const div = document.createElement('div');
+        div.className = "text-center font-semibold text-xs";
+        div.textContent = zone;
+        headerRow.appendChild(div);
+      });
+
+      const attemptRow = document.createElement('div');
+      attemptRow.className = "grid grid-cols-5 gap-4";
+      zoneNames.forEach(zone => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.name = `${prefix}attempted_${zone}`;
+        input.placeholder = 'Attempted';
+        input.className = 'p-2 border rounded text-center text-xs';
+        attemptRow.appendChild(input);
+      });
+
+      const madeRow = document.createElement('div');
+      madeRow.className = "grid grid-cols-5 gap-4";
+      zoneNames.forEach(zone => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.name = `${prefix}made_${zone}`;
+        input.placeholder = 'Made';
+        input.className = 'p-2 border rounded text-center text-xs';
+        madeRow.appendChild(input);
+      });
+
+      container.appendChild(headerRow);
+      container.appendChild(attemptRow);
+      container.appendChild(madeRow);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("zoneType")?.addEventListener("change", (e) => {
+        const zoneNames = zoneMap[e.target.value] || [];
+        renderZoneInputs("zoneInputs", zoneNames);
+      });
+
+      document.getElementById("editZoneType")?.addEventListener("change", (e) => {
+        const zoneNames = zoneMap[e.target.value] || [];
+        renderZoneInputs("editZoneInputs", zoneNames, 'edit_');
+      });
+    });
+  </script>
 </body>
 
 </html>
