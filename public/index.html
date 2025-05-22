@@ -13,45 +13,56 @@
   <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md">
     <h1 class="text-2xl font-bold mb-4 text-center">📊 SmartShooter Training Log</h1>
 
-    <!-- 📝 Shooting Log Form -->
     <form id="logForm" class="space-y-4">
+      <input type="hidden" id="sessionId" />
       <div>
         <label for="date" class="block font-medium">Date</label>
-        <input type="date" id="date" name="date" class="w-full border border-gray-300 p-2 rounded" required />
+        <input type="date" id="date" class="w-full border border-gray-300 p-2 rounded" required />
       </div>
 
       <div>
-        <label for="zone" class="block font-medium">Zone</label>
-        <select id="zone" name="zone" class="w-full border border-gray-300 p-2 rounded" required>
-          <option value="">-- Select Zone --</option>
-          <option>Top of Key</option>
-          <option>Left Corner</option>
-          <option>Left Wing</option>
-          <option>Right Wing</option>
-          <option>Right Corner</option>
-          <option>Left Midrange</option>
-          <option>Right Midrange</option>
-          <option>Left Baseline</option>
-          <option>Right Baseline</option>
-          <option>Paint</option>
+        <label for="trainingType" class="block font-medium">Training Type</label>
+        <select id="trainingType" class="w-full border border-gray-300 p-2 rounded" required>
+          <option value="">-- Select Training Type --</option>
+          <option value="Spot Shooting">Spot Shooting</option>
+          <option value="Catch and Shoot">Catch and Shoot</option>
+          <option value="Off the Dribble">Off the Dribble</option>
+          <option value="Run Half Court">Run Half Court</option>
         </select>
       </div>
 
-      <div class="flex space-x-4">
-        <div class="w-1/2">
-          <label for="attempted" class="block font-medium">Shots Attempted</label>
-          <input type="number" id="attempted" name="attempted" class="w-full border border-gray-300 p-2 rounded"
-            required />
+      <div id="zoneInputs" class="mt-6 space-y-4">
+        <div class="grid grid-cols-5 gap-4">
+          <div class="text-center font-semibold">Left Corner</div>
+          <div class="text-center font-semibold">Left Wing</div>
+          <div class="text-center font-semibold">Top of Key</div>
+          <div class="text-center font-semibold">Right Wing</div>
+          <div class="text-center font-semibold">Right Corner</div>
         </div>
-        <div class="w-1/2">
-          <label for="made" class="block font-medium">Shots Made</label>
-          <input type="number" id="made" name="made" class="w-full border border-gray-300 p-2 rounded" required />
+        <div class="grid grid-cols-5 gap-4">
+          <input name="attempted_Left Corner" placeholder="Attempted" class="p-2 border rounded text-center"
+            type="number" />
+          <input name="attempted_Left Wing" placeholder="Attempted" class="p-2 border rounded text-center"
+            type="number" />
+          <input name="attempted_Top of Key" placeholder="Attempted" class="p-2 border rounded text-center"
+            type="number" />
+          <input name="attempted_Right Wing" placeholder="Attempted" class="p-2 border rounded text-center"
+            type="number" />
+          <input name="attempted_Right Corner" placeholder="Attempted" class="p-2 border rounded text-center"
+            type="number" />
+        </div>
+        <div class="grid grid-cols-5 gap-4">
+          <input name="made_Left Corner" placeholder="Made" class="p-2 border rounded text-center" type="number" />
+          <input name="made_Left Wing" placeholder="Made" class="p-2 border rounded text-center" type="number" />
+          <input name="made_Top of Key" placeholder="Made" class="p-2 border rounded text-center" type="number" />
+          <input name="made_Right Wing" placeholder="Made" class="p-2 border rounded text-center" type="number" />
+          <input name="made_Right Corner" placeholder="Made" class="p-2 border rounded text-center" type="number" />
         </div>
       </div>
 
       <div>
         <label for="notes" class="block font-medium">Notes</label>
-        <textarea id="notes" name="notes" rows="3" class="w-full border border-gray-300 p-2 rounded"></textarea>
+        <textarea id="notes" rows="3" class="w-full border border-gray-300 p-2 rounded"></textarea>
       </div>
 
       <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
@@ -72,224 +83,110 @@
     <div id="zoneChart" class="w-full" style="height: 538px;"></div>
   </div>
 
+  <!-- 🗂️ Training Sessions Log -->
 
-  <!-- Firebase SDKs -->
-  <script type="module">
-    // Import Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+  <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-xl font-semibold mb-4">📋 Training Session Log</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-left border border-gray-300">
+        <thead class="bg-gray-100 text-xs uppercase font-bold">
+          <tr>
+            <th class="px-4 py-2 cursor-pointer" data-sort="date">📅 Date</th>
+            <th class="px-4 py-2 cursor-pointer" data-sort="trainingType">🏀 Type</th>
+            <th class="px-4 py-2">📍 Zones</th>
+            <th class="px-4 py-2 cursor-pointer" data-sort="accuracy">🎯 Accuracy</th>
+            <th class="px-4 py-2">📝 Notes</th>
+            <th class="px-4 py-2">⚙️ Actions</th>
+          </tr>
+        </thead>
 
-    // Your Firebase configuration (replace with your real config!)
-    const firebaseConfig = {
-      apiKey: "AIzaSyAvIp8q3xxlWq7iQC99XgZGCUt2CQQeBDE",
-      authDomain: "smart-shooter.firebaseapp.com",
-      projectId: "smart-shooter",
-      storageBucket: "smart-shooter.firebasestorage.app",
-      messagingSenderId: "21050786577",
-      appId: "1:21050786577:web:dfd514bb359e7e275042b0"
-    };
+        <tbody id="sessionTableBody" class="divide-y divide-gray-200 bg-white">
+          <!-- Data will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ✏️ Edit Session Modal -->
+  <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg relative">
+      <h2 class="text-xl font-semibold mb-4">✏️ Edit Training Session</h2>
+      <form id="editForm" class="space-y-4">
+        <input type="hidden" id="editSessionId" />
+        <div>
+          <label for="editDate" class="block font-medium">Date</label>
+          <input type="date" id="editDate" class="w-full border border-gray-300 p-2 rounded" required />
+        </div>
+
+        <div>
+          <label for="editTrainingType" class="block font-medium">Training Type</label>
+          <select id="editTrainingType" class="w-full border border-gray-300 p-2 rounded" required>
+            <option value="">-- Select Training Type --</option>
+            <option value="Spot Shooting">Spot Shooting</option>
+            <option value="Catch and Shoot">Catch and Shoot</option>
+            <option value="Off the Dribble">Off the Dribble</option>
+            <option value="Run Half Court">Run Half Court</option>
+          </select>
+        </div>
+
+        <div id="editZoneInputs" class="space-y-4">
+          <div class="grid grid-cols-5 gap-4">
+            <div class="text-center font-semibold">Left Corner</div>
+            <div class="text-center font-semibold">Left Wing</div>
+            <div class="text-center font-semibold">Top of Key</div>
+            <div class="text-center font-semibold">Right Wing</div>
+            <div class="text-center font-semibold">Right Corner</div>
+          </div>
+          <div class="grid grid-cols-5 gap-4">
+            <input name="edit_attempted_Left Corner" placeholder="Attempted" class="p-2 border rounded text-center"
+              type="number" />
+            <input name="edit_attempted_Left Wing" placeholder="Attempted" class="p-2 border rounded text-center"
+              type="number" />
+            <input name="edit_attempted_Top of Key" placeholder="Attempted" class="p-2 border rounded text-center"
+              type="number" />
+            <input name="edit_attempted_Right Wing" placeholder="Attempted" class="p-2 border rounded text-center"
+              type="number" />
+            <input name="edit_attempted_Right Corner" placeholder="Attempted" class="p-2 border rounded text-center"
+              type="number" />
+          </div>
+          <div class="grid grid-cols-5 gap-4">
+            <input name="edit_made_Left Corner" placeholder="Made" class="p-2 border rounded text-center"
+              type="number" />
+            <input name="edit_made_Left Wing" placeholder="Made" class="p-2 border rounded text-center" type="number" />
+            <input name="edit_made_Top of Key" placeholder="Made" class="p-2 border rounded text-center"
+              type="number" />
+            <input name="edit_made_Right Wing" placeholder="Made" class="p-2 border rounded text-center"
+              type="number" />
+            <input name="edit_made_Right Corner" placeholder="Made" class="p-2 border rounded text-center"
+              type="number" />
+          </div>
+        </div>
+
+        <div>
+          <label for="editNotes" class="block font-medium">Notes</label>
+          <textarea id="editNotes" rows="3" class="w-full border border-gray-300 p-2 rounded"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-2">
+          <button type="button" id="cancelEdit"
+            class="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400">Cancel</button>
+          <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Update
+            Session</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-
-    // Sign in anonymously
-    signInAnonymously(auth).catch(error => {
-      console.error("Anonymous sign-in failed:", error);
-    });
-
-    // Wait for user to be authenticated before enabling form
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        const uid = user.uid;
-        console.log("Logged in as:", uid);
-
-        document.getElementById("logForm").addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const date = document.getElementById("date").value;
-          const zone = document.getElementById("zone").value;
-          const attempted = parseInt(document.getElementById("attempted").value);
-          const made = parseInt(document.getElementById("made").value);
-          const notes = document.getElementById("notes").value;
-
-          const accuracy = attempted > 0 ? (made / attempted * 100).toFixed(1) : 0;
-
-          try {
-            await addDoc(collection(db, "sessions"), {
-              userId: uid,
-              date,
-              zone,
-              shotsAttempted: attempted,
-              shotsMade: made,
-              accuracy: Number(accuracy),
-              notes,
-              timestamp: new Date()
-            });
-            alert("Session saved!");
-            e.target.reset();
-          } catch (error) {
-            alert("Failed to save session: " + error.message);
-            console.error("Firestore error:", error);
-          }
-        });
-      }
-    });
-  </script>
-
-  <!-- Chart.js for line/area charts -->
+  <!-- 🔗 Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Konva.js for interactive basketball court zones -->
   <script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js"></script>
 
-  <script type="module">
-    const stage = new Konva.Stage({
-      container: 'zoneChart',
-      width: 600,
-      height: 538
-    });
-
-    const layer = new Konva.Layer();
-    stage.add(layer);
-
-    // Load court image
-    const imageObj = new Image();
-    imageObj.src = './assets/court.png'; // adjust path if needed
-
-    imageObj.onload = function () {
-      const court = new Konva.Image({
-        x: 0,
-        y: 0,
-        image: imageObj,
-        width: stage.width(),
-        height: stage.height()
-      });
-
-      layer.add(court);
-
-      // Define zones (adjust positions to match court layout)
-      const zones = [
-        { id: 'Top of Key', x: 250, y: 67, w: 100, h: 67 },
-        { id: 'Left Corner', x: 30, y: 430, w: 50, h: 54 },
-        { id: 'Right Corner', x: 520, y: 430, w: 50, h: 54 },
-        { id: 'Left Wing', x: 100, y: 202, w: 80, h: 67 },
-        { id: 'Right Wing', x: 420, y: 202, w: 80, h: 67 },
-        { id: 'Left Midrange', x: 160, y: 310, w: 60, h: 54 },
-        { id: 'Right Midrange', x: 380, y: 310, w: 60, h: 54 },
-        { id: 'Left Baseline', x: 100, y: 430, w: 60, h: 54 },
-        { id: 'Right Baseline', x: 440, y: 430, w: 60, h: 54 },
-        { id: 'Paint', x: 250, y: 269, w: 100, h: 161 }
-      ];
-
-
-      zones.forEach(zone => {
-        const rect = new Konva.Rect({
-          x: zone.x,
-          y: zone.y,
-          width: zone.w,
-          height: zone.h,
-          fill: 'rgba(0, 128, 0, 0.3)', // green overlay, semi-transparent
-          stroke: '#fff',
-          strokeWidth: 1,
-          cornerRadius: 4
-        });
-
-        const label = new Konva.Text({
-          x: zone.x,
-          y: zone.y + zone.h / 2 - 10,
-          width: zone.w,
-          align: 'center',
-          text: zone.id,
-          fontSize: 10,
-          fill: '#fff'
-        });
-
-        rect.on('mouseover', () => {
-          document.body.style.cursor = 'pointer';
-          rect.opacity(0.6);
-          layer.draw();
-        });
-
-        rect.on('mouseout', () => {
-          document.body.style.cursor = 'default';
-          rect.opacity(0.3);
-          layer.draw();
-        });
-
-        layer.add(rect);
-        layer.add(label);
-      });
-
-      layer.draw();
-    };
-  </script>
-
-<script type="module">
-  import { db, auth } from './firebase-setup.js';
-  import {
-    collection, query, where, orderBy, getDocs
-  } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-
-  document.addEventListener("DOMContentLoaded", () => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-
-        const q = query(
-          collection(db, "sessions"),
-          where("userId", "==", uid),
-          orderBy("date")
-        );
-
-        const snapshot = await getDocs(q);
-        const labels = [];
-        const data = [];
-
-        snapshot.forEach(doc => {
-          const session = doc.data();
-          labels.push(session.date);
-          data.push(session.accuracy);
-        });
-
-        console.log("Chart Data:", { labels, data });
-
-        const ctx = document.getElementById("progressChart").getContext("2d");
-        new Chart(ctx, {
-          type: "line",
-          data: {
-            labels,
-            datasets: [{
-              label: "Shooting Accuracy (%)",
-              data,
-              borderColor: "green",
-              backgroundColor: "rgba(0,128,0,0.2)",
-              fill: true,
-              tension: 0.3
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                min: 0,
-                max: 100,
-                ticks: { stepSize: 10 }
-              }
-            },
-            plugins: {
-              legend: { display: false }
-            }
-          }
-        });
-      }
-    });
-  });
-</script>
+  <!-- 🚀 Your Modules -->
+  <script type="module" src="./firebase-setup.js"></script>
+  <script type="module" src="./session-handler.js"></script>
+  <script type="module" src="./progress-chart.js"></script>
+  <script type="module" src="./ui-render.js"></script>
 
 </body>
 
