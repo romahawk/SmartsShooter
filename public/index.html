@@ -173,17 +173,17 @@
 
       // Define zones (adjust positions to match court layout)
       const zones = [
-  { id: 'Top of Key',     x: 250, y: 67,   w: 100, h: 67 },
-  { id: 'Left Corner',    x: 30,  y: 430,  w: 50,  h: 54 },
-  { id: 'Right Corner',   x: 520, y: 430,  w: 50,  h: 54 },
-  { id: 'Left Wing',      x: 100, y: 202,  w: 80,  h: 67 },
-  { id: 'Right Wing',     x: 420, y: 202,  w: 80,  h: 67 },
-  { id: 'Left Midrange',  x: 160, y: 310,  w: 60,  h: 54 },
-  { id: 'Right Midrange', x: 380, y: 310,  w: 60,  h: 54 },
-  { id: 'Left Baseline',  x: 100, y: 430,  w: 60,  h: 54 },
-  { id: 'Right Baseline', x: 440, y: 430,  w: 60,  h: 54 },
-  { id: 'Paint',          x: 250, y: 269,  w: 100, h: 161 }
-];
+        { id: 'Top of Key', x: 250, y: 67, w: 100, h: 67 },
+        { id: 'Left Corner', x: 30, y: 430, w: 50, h: 54 },
+        { id: 'Right Corner', x: 520, y: 430, w: 50, h: 54 },
+        { id: 'Left Wing', x: 100, y: 202, w: 80, h: 67 },
+        { id: 'Right Wing', x: 420, y: 202, w: 80, h: 67 },
+        { id: 'Left Midrange', x: 160, y: 310, w: 60, h: 54 },
+        { id: 'Right Midrange', x: 380, y: 310, w: 60, h: 54 },
+        { id: 'Left Baseline', x: 100, y: 430, w: 60, h: 54 },
+        { id: 'Right Baseline', x: 440, y: 430, w: 60, h: 54 },
+        { id: 'Paint', x: 250, y: 269, w: 100, h: 161 }
+      ];
 
 
       zones.forEach(zone => {
@@ -228,7 +228,68 @@
     };
   </script>
 
+<script type="module">
+  import { db, auth } from './firebase-setup.js';
+  import {
+    collection, query, where, orderBy, getDocs
+  } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
+  document.addEventListener("DOMContentLoaded", () => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
+
+        const q = query(
+          collection(db, "sessions"),
+          where("userId", "==", uid),
+          orderBy("date")
+        );
+
+        const snapshot = await getDocs(q);
+        const labels = [];
+        const data = [];
+
+        snapshot.forEach(doc => {
+          const session = doc.data();
+          labels.push(session.date);
+          data.push(session.accuracy);
+        });
+
+        console.log("Chart Data:", { labels, data });
+
+        const ctx = document.getElementById("progressChart").getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [{
+              label: "Shooting Accuracy (%)",
+              data,
+              borderColor: "green",
+              backgroundColor: "rgba(0,128,0,0.2)",
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                min: 0,
+                max: 100,
+                ticks: { stepSize: 10 }
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+    });
+  });
+</script>
 
 </body>
 
