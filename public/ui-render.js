@@ -81,7 +81,13 @@ export async function renderZonesChart(sessions) {
       x, y: y + h / 2 - 10, width: w,
       align: 'center',
       text: `${Math.round(accuracy * 100)}%`,
-      fontSize: 10, fill: '#fff'
+      fontSize: 12,
+      fontStyle: 'bold',
+      fill: '#fff',
+      shadowColor: '#000',
+      shadowBlur: 1,
+      shadowOffset: { x: 0.5, y: 0.5 },
+      shadowOpacity: 0.8
     });
 
     rect.on('mouseover', () => {
@@ -104,10 +110,11 @@ export async function renderZonesChart(sessions) {
 }
 
 function getZoneColor(accuracy) {
-  if (accuracy < 0.3) return 'rgba(255, 0, 0, 0.4)';
-  if (accuracy < 0.5) return 'rgba(228, 224, 0, 0.76)';
-  if (accuracy < 0.7) return 'rgba(141, 228, 0, 0.76)';
-  return 'rgba(109, 252, 109, 0.66)';
+  if (accuracy == 0) return 'rgba(255, 0, 0, 0.6)';
+  if (accuracy < 0.25) return 'rgba(255, 0, 170, 0.6)';
+  if (accuracy < 0.5) return 'rgba(255, 174, 0, 0.79)';
+  if (accuracy < 0.75) return 'rgba(0, 255, 136, 0.86)';
+  return 'rgba(41, 252, 41, 0.8)';
 }
 
 function getZoneStatsFromSessions(sessions) {
@@ -123,7 +130,6 @@ function getZoneStatsFromSessions(sessions) {
   return totals;
 }
 
-// Initial render with all sessions after auth
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
   const q = query(collection(db, "sessions"), where("userId", "==", user.uid));
