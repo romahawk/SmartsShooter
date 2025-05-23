@@ -255,6 +255,8 @@
   <!-- 📊 Filter Accuracy Chart -->
   <script type="module">
   import { renderProgressChartFromSessions } from './progress-chart.js';
+  import { renderZonesChart } from './ui-render.js';
+
 
   window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("applyChartFilter")?.addEventListener("click", () => {
@@ -267,6 +269,8 @@
       );
 
       renderProgressChartFromSessions(filtered);
+      renderZonesChart(filtered);
+
     });
   });
 </script>
