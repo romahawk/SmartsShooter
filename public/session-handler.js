@@ -190,6 +190,7 @@ async function loadSessionLog(uid) {
       document.getElementById("editDate").value = session.date;
       document.getElementById("editTrainingType").value = session.trainingType;
       document.getElementById("editZoneType").value = session.zoneType;
+      document.getElementById("editZoneType").dispatchEvent(new Event("change"));
       document.getElementById("editNotes").value = session.notes || "";
 
       const zoneNames = zoneMap[session.zoneType] || [];
