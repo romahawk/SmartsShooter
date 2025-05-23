@@ -63,8 +63,10 @@ export async function renderZonesChart(sessions) {
   }
 
   const stats = getZoneStatsFromSessions(sessions);
+  const activeZoneTypes = new Set(sessions.map(s => s.zoneType));
+  const visibleZones = zones.filter(z => activeZoneTypes.has(z.type));
 
-  zones.forEach(zone => {
+  visibleZones.forEach(zone => {
     const { id, x, y, w, h } = zone;
     const { attempted = 0, made = 0 } = stats[id] || {};
     const accuracy = attempted > 0 ? made / attempted : 0;
@@ -103,7 +105,8 @@ export async function renderZonesChart(sessions) {
 
 function getZoneColor(accuracy) {
   if (accuracy < 0.3) return 'rgba(255, 0, 0, 0.4)';
-  if (accuracy < 0.4) return 'rgba(228, 224, 0, 0.76)';
+  if (accuracy < 0.5) return 'rgba(228, 224, 0, 0.76)';
+  if (accuracy < 0.7) return 'rgba(141, 228, 0, 0.76)';
   return 'rgba(109, 252, 109, 0.66)';
 }
 
