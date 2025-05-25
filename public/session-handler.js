@@ -143,9 +143,8 @@ async function loadSessionLog(uid) {
   tbody.innerHTML = "";
 
   sessions.forEach(session => {
-    const zoneStats = Object.entries(session.zones || {})
-      .map(([zone, { attempted, made }]) => `${zone}: ${made}/${attempted}`)
-      .join("<br>");
+    const zoneStats = session.zoneType ? session.zoneType.charAt(0).toUpperCase() + session.zoneType.slice(1) : "—";
+
 
     const row = document.createElement("tr");
     row.innerHTML = `
