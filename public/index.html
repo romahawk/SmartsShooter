@@ -34,6 +34,13 @@
         </div>
 
         <div>
+          <label for="roundCount" class="block text-sm font-medium text-gray-700">Rounds</label>
+          <input type="number" id="roundCount" min="1" max="10" value="1"
+            class="w-full mt-1 border border-gray-300 p-2 rounded" required>
+        </div>
+
+
+        <div>
           <label for="zoneType" class="block text-sm font-medium text-gray-700">Zone Type</label>
           <select id="zoneType" class="w-full mt-1 border border-gray-300 p-2 rounded" required>
             <option value="">-- Select Zone Type --</option>
@@ -73,24 +80,25 @@
 
 
   <!-- Training Session Log -->
-  <div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
-    <h2 class="text-xl font-semibold mb-4">📋 Training Session Log</h2>
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm text-left border border-gray-300">
-        <thead class="bg-gray-100 text-xs uppercase font-bold">
-          <tr>
-            <th class="px-4 py-2 cursor-pointer" data-sort="date">📅 Date</th>
-            <th class="px-4 py-2 cursor-pointer" data-sort="trainingType">🏀 Type</th>
-            <th class="px-4 py-2">📍 Zones</th>
-            <th class="px-4 py-2 cursor-pointer" data-sort="accuracy">🎯 Accuracy</th>
-            <th class="px-4 py-2">📝 Notes</th>
-            <th class="px-4 py-2">⚙️ Actions</th>
-          </tr>
-        </thead>
-        <tbody id="sessionTableBody" class="divide-y divide-gray-200 bg-white"></tbody>
-      </table>
-    </div>
+<div class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md">
+  <h2 class="text-xl font-semibold mb-4">📋 Training Session Log</h2>
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm text-left border border-gray-300">
+      <thead class="bg-gray-100 text-xs uppercase font-bold">
+        <tr>
+          <th class="px-4 py-2 cursor-pointer" data-sort="date">📅 Date</th>
+          <th class="px-4 py-2 cursor-pointer" data-sort="trainingType">🏀 Type</th>
+          <th class="px-4 py-2">📍 Zones</th>
+          <th class="px-4 py-2">🔁 Rounds</th>
+          <th class="px-4 py-2 cursor-pointer" data-sort="accuracy">🎯 Accuracy</th>
+          <th class="px-4 py-2">📝 Notes</th>
+          <th class="px-4 py-2">⚙️ Actions</th>
+        </tr>
+      </thead>
+      <tbody id="sessionTableBody" class="divide-y divide-gray-200 bg-white"></tbody>
+    </table>
   </div>
+</div>
 
   <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg relative">
@@ -123,6 +131,12 @@
               <option value="midrange">Midrange</option>
             </select>
           </div>
+
+          <div>
+            <label for="editRoundCount" class="block text-sm font-medium text-gray-700">Rounds</label>
+            <input type="number" id="editRoundCount" min="1" max="10" value="1"
+              class="w-full mt-1 border border-gray-300 p-2 rounded" required>
+          </div>
         </div>
 
         <div id="editZoneInputs" class="space-y-4"></div>
@@ -154,64 +168,103 @@
   <script type="module" src="./progress-chart.js"></script>
   <script type="module" src="./ui-render.js"></script>
 
-  <script>
-    const zoneMap = {
-      "3pt": ["Left Corner", "Left Wing 3pt", "Top of Key 3pt", "Right Wing 3pt", "Right Corner"],
-      "midrange": ["Left Baseline", "Left Wing", "Free Throw", "Right Wing", "Right Baseline"]
-    };
+<script>
+  const zoneMap = {
+    "3pt": ["Left Corner", "Left Wing 3pt", "Top of Key 3pt", "Right Wing 3pt", "Right Corner"],
+    "midrange": ["Left Baseline", "Left Wing", "Free Throw", "Right Wing", "Right Baseline"]
+  };
 
-    function renderZoneInputs(containerId, zoneNames, prefix = '') {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
+  function renderZoneRounds(containerId, zoneNames, roundCount = 1, prefix = '') {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
 
-      const headerRow = document.createElement('div');
-      headerRow.className = "grid grid-cols-5 gap-4";
-      zoneNames.forEach(zone => {
-        const div = document.createElement('div');
-        div.className = "text-center font-semibold text-xs";
-        div.textContent = zone;
-        headerRow.appendChild(div);
-      });
+  for (let round = 1; round <= roundCount; round++) {
+    const roundHeader = document.createElement('h4');
+    roundHeader.className = "text-sm font-semibold text-blue-700 mt-4";
+    roundHeader.textContent = `Round ${round}`;
+    container.appendChild(roundHeader);
 
-      const attemptRow = document.createElement('div');
-      attemptRow.className = "grid grid-cols-5 gap-4";
-      zoneNames.forEach(zone => {
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.name = `${prefix}attempted_${zone}`;
-        input.placeholder = 'Attempted';
-        input.className = 'p-2 border rounded text-center text-xs';
-        attemptRow.appendChild(input);
-      });
-
-      const madeRow = document.createElement('div');
-      madeRow.className = "grid grid-cols-5 gap-4";
-      zoneNames.forEach(zone => {
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.name = `${prefix}made_${zone}`;
-        input.placeholder = 'Made';
-        input.className = 'p-2 border rounded text-center text-xs';
-        madeRow.appendChild(input);
-      });
-
-      container.appendChild(headerRow);
-      container.appendChild(attemptRow);
-      container.appendChild(madeRow);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("zoneType")?.addEventListener("change", (e) => {
-        const zoneNames = zoneMap[e.target.value] || [];
-        renderZoneInputs("zoneInputs", zoneNames);
-      });
-
-      document.getElementById("editZoneType")?.addEventListener("change", (e) => {
-        const zoneNames = zoneMap[e.target.value] || [];
-        renderZoneInputs("editZoneInputs", zoneNames, 'edit_');
-      });
+    const headerRow = document.createElement('div');
+    headerRow.className = "grid grid-cols-5 gap-4";
+    zoneNames.forEach(zone => {
+      const div = document.createElement('div');
+      div.className = "text-center font-semibold text-xs";
+      div.textContent = zone;
+      headerRow.appendChild(div);
     });
-  </script>
+
+    const attemptRow = document.createElement('div');
+    attemptRow.className = "grid grid-cols-5 gap-4";
+    const attemptInputs = {};
+
+    zoneNames.forEach(zone => {
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.name = `${prefix}round_${round}_attempted_${zone}`;
+      input.placeholder = 'Attempted';
+      input.min = 0;
+      input.className = 'p-2 border rounded text-center text-xs';
+      attemptInputs[zone] = input;
+      attemptRow.appendChild(input);
+    });
+
+    const madeRow = document.createElement('div');
+    madeRow.className = "grid grid-cols-5 gap-4";
+
+    zoneNames.forEach(zone => {
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.name = `${prefix}round_${round}_made_${zone}`;
+      input.placeholder = 'Made';
+      input.min = 0;
+      input.className = 'p-2 border rounded text-center text-xs';
+
+      input.addEventListener("input", () => {
+        const attempted = parseInt(attemptInputs[zone].value || 0);
+        const made = parseInt(input.value || 0);
+        if (made > attempted) {
+          input.value = attempted;
+        }
+      });
+
+      madeRow.appendChild(input);
+    });
+
+    container.appendChild(headerRow);
+    container.appendChild(attemptRow);
+    container.appendChild(madeRow);
+  }
+}
+
+
+  function triggerRenderZoneInputs(prefix = '', containerId = 'zoneInputs', zoneTypeId = 'zoneType', roundCountId = 'roundCount') {
+    const zoneType = document.getElementById(zoneTypeId)?.value;
+    const roundCount = parseInt(document.getElementById(roundCountId)?.value || 1);
+    const zoneNames = zoneMap[zoneType] || [];
+    renderZoneRounds(containerId, zoneNames, roundCount, prefix);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // New session form
+    document.getElementById("zoneType")?.addEventListener("change", () => {
+      triggerRenderZoneInputs();
+    });
+
+    document.getElementById("roundCount")?.addEventListener("input", () => {
+      triggerRenderZoneInputs();
+    });
+
+    // Edit session modal
+    document.getElementById("editZoneType")?.addEventListener("change", () => {
+      triggerRenderZoneInputs('edit_', 'editZoneInputs', 'editZoneType', 'editRoundCount');
+    });
+
+    document.getElementById("editRoundCount")?.addEventListener("input", () => {
+      triggerRenderZoneInputs('edit_', 'editZoneInputs', 'editZoneType', 'editRoundCount');
+    });
+  });
+</script>
+
 
   <script type="module">
     import { renderZonesChart } from './ui-render.js';
@@ -254,54 +307,51 @@
 
   <!-- 📊 Filter Accuracy Chart -->
   <script type="module">
-  import { renderProgressChartFromSessions } from './progress-chart.js';
-  import { renderZonesChart } from './ui-render.js';
+    import { renderProgressChartFromSessions } from './progress-chart.js';
+    import { renderZonesChart } from './ui-render.js';
 
 
-  window.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("applyChartFilter")?.addEventListener("click", () => {
-      const training = Array.from(document.getElementById("trainingTypeFilter")?.selectedOptions || []).map(opt => opt.value);
-      const zones = Array.from(document.getElementById("zoneTypeFilter")?.selectedOptions || []).map(opt => opt.value);
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("applyChartFilter")?.addEventListener("click", () => {
+        const training = Array.from(document.getElementById("trainingTypeFilter")?.selectedOptions || []).map(opt => opt.value);
+        const zones = Array.from(document.getElementById("zoneTypeFilter")?.selectedOptions || []).map(opt => opt.value);
 
-      const filtered = (window.allSessions || []).filter(s =>
-        (training.length === 0 || training.includes(s.trainingType)) &&
-        (zones.length === 0 || zones.includes(s.zoneType))
-      );
+        const filtered = (window.allSessions || []).filter(s =>
+          (training.length === 0 || training.includes(s.trainingType)) &&
+          (zones.length === 0 || zones.includes(s.zoneType))
+        );
 
-      renderProgressChartFromSessions(filtered);
-      renderZonesChart(filtered);
+        renderProgressChartFromSessions(filtered);
+        renderZonesChart(filtered);
 
+      });
     });
-  });
-</script>
+  </script>
 
-<div class="max-w-3xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
-  <h2 class="text-lg font-semibold mb-4">🎯 Filter Shooting Accuracy Chart</h2>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <label class="block text-sm font-medium text-gray-700">Training Type</label>
-      <select id="trainingTypeFilter" class="w-full border border-gray-300 p-2 rounded" multiple>
-        <option value="Spot Shooting">Spot Shooting</option>
-        <option value="Catch and Shoot">Catch and Shoot</option>
-        <option value="Off the Dribble">Off the Dribble</option>
-        <option value="Run Half Court">Run Half Court</option>
-      </select>
+  <div class="max-w-3xl mx-auto mt-6 bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-lg font-semibold mb-4">🎯 Filter Shooting Accuracy Chart</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Training Type</label>
+        <select id="trainingTypeFilter" class="w-full border border-gray-300 p-2 rounded" multiple>
+          <option value="Spot Shooting">Spot Shooting</option>
+          <option value="Catch and Shoot">Catch and Shoot</option>
+          <option value="Off the Dribble">Off the Dribble</option>
+          <option value="Run Half Court">Run Half Court</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Zone Type</label>
+        <select id="zoneTypeFilter" class="w-full border border-gray-300 p-2 rounded" multiple>
+          <option value="3pt">3pt</option>
+          <option value="midrange">midrange</option>
+        </select>
+      </div>
     </div>
-    <div>
-      <label class="block text-sm font-medium text-gray-700">Zone Type</label>
-      <select id="zoneTypeFilter" class="w-full border border-gray-300 p-2 rounded" multiple>
-        <option value="3pt">3pt</option>
-        <option value="midrange">midrange</option>
-      </select>
-    </div>
+    <button id="applyChartFilter" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+      Apply Filters
+    </button>
   </div>
-  <button id="applyChartFilter" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-    Apply Filters
-  </button>
-</div>
-
-
-
 </body>
 
 </html>

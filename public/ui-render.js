@@ -120,15 +120,18 @@ function getZoneColor(accuracy) {
 function getZoneStatsFromSessions(sessions) {
   const totals = {};
   sessions.forEach(doc => {
-    const zones = doc.zones || {};
-    for (const [zoneId, { attempted, made }] of Object.entries(zones)) {
-      if (!totals[zoneId]) totals[zoneId] = { attempted: 0, made: 0 };
-      totals[zoneId].attempted += attempted;
-      totals[zoneId].made += made;
-    }
+    const rounds = doc.rounds || [];
+    rounds.forEach(round => {
+      for (const [zoneId, { attempted = 0, made = 0 }] of Object.entries(round)) {
+        if (!totals[zoneId]) totals[zoneId] = { attempted: 0, made: 0 };
+        totals[zoneId].attempted += attempted;
+        totals[zoneId].made += made;
+      }
+    });
   });
   return totals;
 }
+
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
