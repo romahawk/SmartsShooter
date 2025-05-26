@@ -1,278 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartShooter</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-gray-100 text-gray-800 font-sans p-4">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   SmartShooter
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+ </head>
+ <body class="bg-gray-100 text-gray-800 font-sans p-4 overflow-x-hidden">
   <!-- 🧱 GRID: 2 rows × 2 columns -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto mt-8">
-
-    <!-- 📊 Left: SmartShooter Training Log (Form) -->
-    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
-      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">📊 SmartShooter Training Log</h2>
-      <!-- Include your actual logForm here -->
-      <form id="logForm" class="space-y-6">
-        <input type="hidden" id="sessionId" />
-
-        <!-- Row: Date, Training Type, Rounds, Zone Type -->
-        <div class="flex flex-wrap md:flex-nowrap gap-4">
-          <!-- Date -->
-          <div class="flex-1 min-w-[150px]">
-            <label for="date" class="block text-sm font-medium text-gray-700 flex items-center gap-1">
-              <!-- Calendar icon -->
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Date
-            </label>
-            <input type="date" id="date" class="w-full mt-1 border border-gray-300 p-2 rounded" required />
-          </div>
-
-          <!-- Training Type -->
-          <div class="flex-1 min-w-[180px]">
-            <label for="trainingType" class="block text-sm font-medium text-gray-700 flex items-center gap-1">
-              <!-- Clipboard icon -->
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 2h6a2 2 0 012 2v1H7V4a2 2 0 012-2zM7 7h10v13a2 2 0 01-2 2H9a2 2 0 01-2-2V7z" />
-              </svg>
-              Training Type
-            </label>
-            <select id="trainingType" class="w-full mt-1 border border-gray-300 p-2 rounded" required>
-              <option value="">-- Select Training Type --</option>
-              <option value="Spot Shooting">Spot Shooting</option>
-              <option value="Catch and Shoot">Catch and Shoot</option>
-              <option value="Off the Dribble">Off the Dribble</option>
-              <option value="Run Half Court">Run Half Court</option>
-            </select>
-          </div>
-
-          <!-- Rounds -->
-          <div class="flex-1 min-w-[100px]">
-            <label for="roundCount" class="block text-sm font-medium text-gray-700 flex items-center gap-1">
-              <!-- Repeat icon -->
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M4 4v6h6M20 20v-6h-6M4 10a9 9 0 0115.3-5.3L20 4M20 14a9 9 0 01-15.3 5.3L4 20" />
-              </svg>
-              Rounds
-            </label>
-            <input type="number" id="roundCount" min="1" max="10" value="1"
-              class="w-full mt-1 border border-gray-300 p-2 rounded" required />
-          </div>
-
-          <!-- Zone Type -->
-          <div class="flex-1 min-w-[160px]">
-            <label for="zoneType" class="block text-sm font-medium text-gray-700 flex items-center gap-1">
-              <!-- Location marker icon -->
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 11c1.1046 0 2-.8954 2-2s-.8954-2-2-2-2 .8954-2 2 .8954 2 2 2zm0 0c-2.5 0-5 2.239-5 5.5C7 19.985 12 22 12 22s5-2.015 5-5.5c0-3.261-2.5-5.5-5-5.5z" />
-              </svg>
-              Zone Type
-            </label>
-            <select id="zoneType" class="w-full mt-1 border border-gray-300 p-2 rounded" required>
-              <option value="">-- Select Zone Type --</option>
-              <option value="3pt">3pt</option>
-              <option value="midrange">Midrange</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Zone Inputs -->
-        <div id="zoneInputs" class="mt-6 space-y-4"></div>
-
-        <!-- Notes -->
-        <div>
-          <label for="notes" class="block text-sm font-medium text-gray-700 flex items-center gap-1">
-            <!-- Pencil icon -->
-            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M15.232 5.232l3.536 3.536M9 11l6-6m2.121-2.121a3 3 0 114.243 4.243L9 21H3v-6l12.121-12.121z" />
-            </svg>
-            Notes
-          </label>
-          <textarea id="notes" rows="3" class="w-full mt-1 border border-gray-300 p-2 rounded"></textarea>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit"
-          class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium flex items-center justify-center gap-2">
-          <span class="text-lg">🏀</span> <span>Submit Session</span>
-        </button>
-      </form>
-    </div>
-
-    <!-- 📋 Left: Training Session Log (Table) -->
-    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
-      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">📋 Training Session Log</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-left border border-gray-300">
-          <thead class="bg-gray-100 text-xs uppercase font-bold">
-            <tr>
-              <th class="px-4 py-2 cursor-pointer" data-sort="date">📅 Date</th>
-              <th class="px-4 py-2 cursor-pointer" data-sort="trainingType">🏀 Type</th>
-              <th class="px-4 py-2">📍 Zones</th>
-              <th class="px-4 py-2">🔁 Rounds</th>
-              <th class="px-4 py-2 cursor-pointer" data-sort="accuracy">🎯 Accuracy</th>
-              <th class="px-4 py-2">📝 Notes</th>
-              <th class="px-4 py-2">⚙️ Actions</th>
-            </tr>
-          </thead>
-          <tbody id="sessionTableBody" class="divide-y divide-gray-200 bg-white"></tbody>
-        </table>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-screen-2xl mx-auto mt-8 px-4">
+   <!-- 📊 Left: SmartShooter Training Log (Form) -->
+   <div class="bg-white p-6 rounded-xl shadow-md flex flex-col w-full">
+    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+     📊 SmartShooter Training Log
+    </h2>
+    <!-- Include your actual logForm here -->
+    <form class="space-y-6" id="logForm">
+     <input id="sessionId" type="hidden"/>
+     <!-- Row: Date, Training Type, Rounds, Zone Type -->
+     <div class="flex flex-wrap md:flex-nowrap gap-4">
+      <!-- Date -->
+      <div class="flex-1 min-w-[150px]">
+       <label class="block text-sm font-medium text-gray-700 flex items-center gap-1" for="date">
+        <!-- Calendar icon -->
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24">
+         <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round">
+         </path>
+        </svg>
+        Date
+       </label>
+       <input class="w-full mt-1 border border-gray-300 p-2 rounded" id="date" required="" type="date"/>
       </div>
-    </div>
-
-    <!-- 📊 Right: SmartShooter Training Log (Chart + Filters) -->
-    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
-      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">📊 SmartShooter Training Log</h2>
-
-      <!-- Accuracy Over Time Chart -->
-      <div class="flex-1">
-        <canvas id="progressChart" class="w-full h-full"></canvas>
+      <!-- Training Type -->
+      <div class="flex-1 min-w-[180px]">
+       <label class="block text-sm font-medium text-gray-700 flex items-center gap-1" for="trainingType">
+        <!-- Clipboard icon -->
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24">
+         <path d="M9 2h6a2 2 0 012 2v1H7V4a2 2 0 012-2zM7 7h10v13a2 2 0 01-2 2H9a2 2 0 01-2-2V7z" stroke-linecap="round" stroke-linejoin="round">
+         </path>
+        </svg>
+        Training Type
+       </label>
+       <select class="w-full mt-1 border border-gray-300 p-2 rounded" id="trainingType" required="">
+        <option value="">
+         -- Select Training Type --
+        </option>
+        <option value="Spot Shooting">
+         Spot Shooting
+        </option>
+        <option value="Catch and Shoot">
+         Catch and Shoot
+        </option>
+        <option value="Off the Dribble">
+         Off the Dribble
+        </option>
+        <option value="Run Half Court">
+         Run Half Court
+        </option>
+       </select>
       </div>
-
-      <!-- Filters -->
-      <div class="mt-6 flex flex-col md:flex-row gap-6 items-start">
-
-        <!-- Filter Shot Zones by Session -->
-        <div class="flex-1 bg-white p-4 rounded-lg shadow flex flex-col">
-          <h3 class="text-base font-semibold mb-3 flex items-center gap-2">🎯 Filter Shot Zones by Session</h3>
-          <div id="sessionCheckboxList" class="space-y-1 text-sm"></div>
-          <button id="applyZoneFilter"
-            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full md:w-auto">
-            Filter Zones
-          </button>
-        </div>
-
-        <!-- Filter Accuracy Chart -->
-        <div class="flex-1 bg-white p-4 rounded-lg shadow flex flex-col">
-          <h3 class="text-base font-semibold mb-3 flex items-center gap-2">🎯 Filter Shooting Accuracy Chart</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Training Type -->
-            <div>
-              <label for="trainingTypeFilter" class="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1">🗂️
-                Training Type</label>
-              <select id="trainingTypeFilter" class="w-full border border-gray-300 p-2 rounded" multiple>
-                <option value="Spot Shooting">Spot Shooting</option>
-                <option value="Catch and Shoot">Catch and Shoot</option>
-                <option value="Off the Dribble">Off the Dribble</option>
-                <option value="Run Half Court">Run Half Court</option>
-              </select>
-            </div>
-
-            <!-- Zone Type -->
-            <div>
-              <label for="zoneTypeFilter" class="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1">📍 Zone
-                Type</label>
-              <select id="zoneTypeFilter" class="w-full border border-gray-300 p-2 rounded" multiple>
-                <option value="3pt">3pt</option>
-                <option value="midrange">midrange</option>
-              </select>
-            </div>
-          </div>
-          <button id="applyChartFilter"
-            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full md:w-auto">
-            Apply Filters
-          </button>
-        </div>
+      <!-- Rounds -->
+      <div class="flex-1 min-w-[100px]">
+       <label class="block text-sm font-medium text-gray-700 flex items-center gap-1" for="roundCount">
+        <!-- Repeat icon -->
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24">
+         <path d="M4 4v6h6M20 20v-6h-6M4 10a9 9 0 0115.3-5.3L20 4M20 14a9 9 0 01-15.3 5.3L4 20" stroke-linecap="round" stroke-linejoin="round">
+         </path>
+        </svg>
+        Rounds
+       </label>
+       <input class="w-full mt-1 border border-gray-300 p-2 rounded" id="roundCount" max="10" min="1" required="" type="number" value="1"/>
       </div>
-    </div>
-
-    <!-- 🔥 Right: Hot Zones Chart -->
-    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col">
-      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">🔥 Hot Zones</h2>
-      <div class="flex-1 flex justify-center items-center overflow-x-auto">
-        <div id="zoneChart" class="relative w-full max-w-[600px] aspect-[3/2]">
-          <!-- Shot zone chart image and overlays -->
-        </div>
+      <!-- Zone Type -->
+      <div class="flex-1 min-w-[160px]">
+       <label class="block text-sm font-medium text-gray-700 flex items-center gap-1" for="zoneType">
+        <!-- Location marker icon -->
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24">
+         <path d="M12 11c1.1046 0 2-.8954 2-2s-.8954-2-2-2-2 .8954-2 2 .8954 2 2 2zm0 0c-2.5 0-5 2.239-5 5.5C7 19.985 12 22 12 22s5-2.015 5-5.5c0-3.261-2.5-5.5-5-5.5z" stroke-linecap="round" stroke-linejoin="round">
+         </path>
+        </svg>
+        Zone Type
+       </label>
+       <select class="w-full mt-1 border border-gray-300 p-2 rounded" id="zoneType" required="">
+        <option value="">
+         -- Select Zone Type --
+        </option>
+        <option value="3pt">
+         3pt
+        </option>
+        <option value="midrange">
+         Midrange
+        </option>
+       </select>
       </div>
+     </div>
+     <!-- Zone Inputs -->
+     <div class="mt-6 space-y-4" id="zoneInputs">
+     </div>
+     <!-- Notes -->
+     <div>
+      <label class="block text-sm font-medium text-gray-700 flex items-center gap-1" for="notes">
+       <!-- Pencil icon -->
+       <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24">
+        <path d="M15.232 5.232l3.536 3.536M9 11l6-6m2.121-2.121a3 3 0 114.243 4.243L9 21H3v-6l12.121-12.121z" stroke-linecap="round" stroke-linejoin="round">
+        </path>
+       </svg>
+       Notes
+      </label>
+      <textarea class="w-full mt-1 border border-gray-300 p-2 rounded" id="notes" rows="3"></textarea>
+     </div>
+     <!-- Submit -->
+     <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium flex items-center justify-center gap-2" type="submit">
+      <span class="text-lg">
+       🏀
+      </span>
+      <span>
+       Submit Session
+      </span>
+     </button>
+    </form>
+   </div>
+   <!-- 📋 Training Session Log (Table) -->
+   <div class="bg-white p-6 rounded-xl shadow-md flex flex-col w-full">
+    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+     📋 Training Session Log
+    </h2>
+    <div class="overflow-x-auto w-full">
+     <table class="min-w-full w-full text-sm text-left border border-gray-300">
+      <thead class="bg-gray-100 text-xs uppercase font-bold">
+       <tr>
+        <th class="px-4 py-2 cursor-pointer" data-sort="date">
+         📅 Date
+        </th>
+        <th class="px-4 py-2 cursor-pointer" data-sort="trainingType">
+         🏀 Type
+        </th>
+        <th class="px-4 py-2">
+         📍 Zones
+        </th>
+        <th class="px-4 py-2">
+         🔁 Rounds
+        </th>
+        <th class="px-4 py-2 cursor-pointer" data-sort="accuracy">
+         🎯 Accuracy
+        </th>
+        <th class="px-4 py-2">
+         📝 Notes
+        </th>
+        <th class="px-4 py-2">
+         ⚙️ Actions
+        </th>
+       </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 bg-white" id="sessionTableBody">
+       <!-- table rows injected here -->
+      </tbody>
+     </table>
     </div>
+   </div>
+   <!-- 📊 Right: SmartShooter Training Log (Chart + Filters) -->
+   <div class="bg-white p-6 rounded-xl shadow-md flex flex-col w-full">
+    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+     📊 SmartShooter Training Log
+    </h2>
+    <!-- Accuracy Over Time Chart -->
+    <div class="flex-1">
+     <canvas class="w-full h-full" id="progressChart">
+     </canvas>
+    </div>
+    <!-- Filters -->
+    <div class="mt-6 flex flex-col md:flex-row gap-6 items-start">
+     <!-- Filter Shot Zones by Session -->
+     <div class="flex-1 bg-white p-4 rounded-lg shadow flex flex-col">
+      <h3 class="text-base font-semibold mb-3 flex items-center gap-2">
+       🎯 Filter Shot Zones by Session
+      </h3>
+      <div class="space-y-1 text-sm" id="sessionCheckboxList">
+      </div>
+      <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full md:w-auto" id="applyZoneFilter">
+       Filter Zones
+      </button>
+     </div>
+     <!-- Filter Accuracy Chart -->
+     <div class="flex-1 bg-white p-4 rounded-lg shadow flex flex-col">
+      <h3 class="text-base font-semibold mb-3 flex items-center gap-2">
+       🎯 Filter Shooting Accuracy Chart
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+       <!-- Training Type -->
+       <div>
+        <label class="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1" for="trainingTypeFilter">
+         🗂️
+                Training Type
+        </label>
+        <select class="w-full border border-gray-300 p-2 rounded" id="trainingTypeFilter" multiple="">
+         <option value="Spot Shooting">
+          Spot Shooting
+         </option>
+         <option value="Catch and Shoot">
+          Catch and Shoot
+         </option>
+         <option value="Off the Dribble">
+          Off the Dribble
+         </option>
+         <option value="Run Half Court">
+          Run Half Court
+         </option>
+        </select>
+       </div>
+       <!-- Zone Type -->
+       <div>
+        <label class="text-sm font-medium text-gray-700 flex items-center gap-1 mb-1" for="zoneTypeFilter">
+         📍 Zone
+                Type
+        </label>
+        <select class="w-full border border-gray-300 p-2 rounded" id="zoneTypeFilter" multiple="">
+         <option value="3pt">
+          3pt
+         </option>
+         <option value="midrange">
+          midrange
+         </option>
+        </select>
+       </div>
+      </div>
+      <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full md:w-auto" id="applyChartFilter">
+       Apply Filters
+      </button>
+     </div>
+    </div>
+   </div>
+   <!-- 🔥 Right: Hot Zones Chart -->
+   <div class="bg-white p-6 rounded-xl shadow-md flex flex-col w-full">
+    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+     🔥 Hot Zones
+    </h2>
+    <div class="flex-1 flex justify-center items-center overflow-x-auto">
+     <div class="relative w-full max-w-[600px] aspect-[3/2]" id="zoneChart">
+      <!-- Shot zone chart image and overlays -->
+     </div>
+    </div>
+   </div>
   </div>
-
-
   <!-- ✏️ Edit Modal -->
-  <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg relative">
-      <h2 class="text-xl font-semibold mb-4">✏️ Edit Training Session</h2>
-      <form id="editForm" class="space-y-4">
-        <input type="hidden" id="editSessionId" />
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label for="editDate" class="block text-sm font-medium text-gray-700">Date</label>
-            <input type="date" id="editDate" class="w-full mt-1 border border-gray-300 p-2 rounded" required />
-          </div>
-
-          <div>
-            <label for="editTrainingType" class="block text-sm font-medium text-gray-700">Training Type</label>
-            <select id="editTrainingType" class="w-full mt-1 border border-gray-300 p-2 rounded" required>
-              <option value="">-- Select Training Type --</option>
-              <option value="Spot Shooting">Spot Shooting</option>
-              <option value="Catch and Shoot">Catch and Shoot</option>
-              <option value="Off the Dribble">Off the Dribble</option>
-              <option value="Run Half Court">Run Half Court</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="editZoneType" class="block text-sm font-medium text-gray-700">Zone Type</label>
-            <select id="editZoneType" class="w-full mt-1 border border-gray-300 p-2 rounded" required>
-              <option value="">-- Select Zone Type --</option>
-              <option value="3pt">3pt</option>
-              <option value="midrange">Midrange</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="editRoundCount" class="block text-sm font-medium text-gray-700">Rounds</label>
-            <input type="number" id="editRoundCount" min="1" max="10" value="1"
-              class="w-full mt-1 border border-gray-300 p-2 rounded" required>
-          </div>
-        </div>
-
-        <div id="editZoneInputs" class="space-y-4"></div>
-
-        <div>
-          <label for="editNotes" class="block text-sm font-medium text-gray-700">Notes</label>
-          <textarea id="editNotes" rows="3" class="w-full mt-1 border border-gray-300 p-2 rounded"></textarea>
-        </div>
-
-        <div class="flex justify-end gap-4 pt-2">
-          <button type="button" id="cancelEdit" class="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400">
-            Cancel
-          </button>
-          <button type="submit"
-            class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex items-center gap-2">
-            <span class="text-lg">✏️</span> <span>Update Session</span>
-          </button>
-        </div>
-      </form>
-    </div>
+  <div class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50" id="editModal">
+   <div class="bg-white rounded-lg w-full max-w-3xl p-6 shadow-lg relative">
+    <h2 class="text-xl font-semibold mb-4">
+     ✏️ Edit Training Session
+    </h2>
+    <form class="space-y-4" id="editForm">
+     <input id="editSessionId" type="hidden"/>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+       <label class="block text-sm font-medium text-gray-700" for="editDate">
+        Date
+       </label>
+       <input class="w-full mt-1 border border-gray-300 p-2 rounded" id="editDate" required="" type="date"/>
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700" for="editTrainingType">
+        Training Type
+       </label>
+       <select class="w-full mt-1 border border-gray-300 p-2 rounded" id="editTrainingType" required="">
+        <option value="">
+         -- Select Training Type --
+        </option>
+        <option value="Spot Shooting">
+         Spot Shooting
+        </option>
+        <option value="Catch and Shoot">
+         Catch and Shoot
+        </option>
+        <option value="Off the Dribble">
+         Off the Dribble
+        </option>
+        <option value="Run Half Court">
+         Run Half Court
+        </option>
+       </select>
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700" for="editZoneType">
+        Zone Type
+       </label>
+       <select class="w-full mt-1 border border-gray-300 p-2 rounded" id="editZoneType" required="">
+        <option value="">
+         -- Select Zone Type --
+        </option>
+        <option value="3pt">
+         3pt
+        </option>
+        <option value="midrange">
+         Midrange
+        </option>
+       </select>
+      </div>
+      <div>
+       <label class="block text-sm font-medium text-gray-700" for="editRoundCount">
+        Rounds
+       </label>
+       <input class="w-full mt-1 border border-gray-300 p-2 rounded" id="editRoundCount" max="10" min="1" required="" type="number" value="1"/>
+      </div>
+     </div>
+     <div class="space-y-4" id="editZoneInputs">
+     </div>
+     <div>
+      <label class="block text-sm font-medium text-gray-700" for="editNotes">
+       Notes
+      </label>
+      <textarea class="w-full mt-1 border border-gray-300 p-2 rounded" id="editNotes" rows="3"></textarea>
+     </div>
+     <div class="flex justify-end gap-4 pt-2">
+      <button class="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400" id="cancelEdit" type="button">
+       Cancel
+      </button>
+      <button class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 flex items-center gap-2" type="submit">
+       <span class="text-lg">
+        ✏️
+       </span>
+       <span>
+        Update Session
+       </span>
+      </button>
+     </div>
+    </form>
+   </div>
   </div>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js"></script>
-  <script type="module" src="./firebase-setup.js"></script>
-  <script type="module" src="./session-handler.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js">
+  </script>
+  <script src="./firebase-setup.js" type="module">
+  </script>
+  <script src="./session-handler.js" type="module">
+  </script>
   <!-- <script type="module" src="./session-handler-debug.js"></script> -->
-  <script type="module" src="./progress-chart.js"></script>
-  <script type="module" src="./ui-render.js"></script>
-
+  <script src="./progress-chart.js" type="module">
+  </script>
+  <script src="./ui-render.js" type="module">
+  </script>
   <script>
-    const zoneMap = {
+   const zoneMap = {
       "3pt": ["Left Corner", "Left Wing 3pt", "Top of Key 3pt", "Right Wing 3pt", "Right Corner"],
       "midrange": ["Left Baseline", "Left Wing", "Free Throw", "Right Wing", "Right Baseline"]
     };
@@ -367,9 +438,8 @@
       });
     });
   </script>
-
   <script type="module">
-    import { renderZonesChart } from './ui-render.js';
+   import { renderZonesChart } from './ui-render.js';
 
     window.addEventListener("DOMContentLoaded", () => {
       const container = document.getElementById("sessionCheckboxList");
@@ -397,10 +467,9 @@
       }, 1000);
     });
   </script>
-
   <!-- 📊 Filter Accuracy Chart -->
   <script type="module">
-    import { renderProgressChartFromSessions } from './progress-chart.js';
+   import { renderProgressChartFromSessions } from './progress-chart.js';
     import { renderZonesChart } from './ui-render.js';
 
 
@@ -420,8 +489,5 @@
       });
     });
   </script>
-
-
-</body>
-
+ </body>
 </html>
