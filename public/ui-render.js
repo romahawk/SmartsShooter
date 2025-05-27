@@ -9,6 +9,7 @@ import {
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
 let stage, layer, zones;
+let tooltip, tooltipText;
 
 function setupStage() {
   stage = new Konva.Stage({
@@ -18,6 +19,28 @@ function setupStage() {
   });
 
   layer = new Konva.Layer();
+  tooltip = new Konva.Label({
+    opacity: 0,
+    visible: false,
+    listening: false
+  });
+  tooltip.add(new Konva.Tag({
+    fill: 'black',
+    pointerDirection: 'down',
+    pointerWidth: 8,
+    pointerHeight: 8,
+    lineJoin: 'round',
+    cornerRadius: 4
+  }));
+  tooltipText = new Konva.Text({
+    text: '',
+    fontFamily: 'Arial',
+    fontSize: 12,
+    padding: 6,
+    fill: 'white'
+  });
+  tooltip.add(tooltipText);
+  layer.add(tooltip);
   stage.add(layer);
 
   const imageObj = new Image();
@@ -37,20 +60,26 @@ function setupStage() {
 }
 
 function initZones() {
-  const zoneSize = { w: 50, h: 50 };
+  const zoneSize = { w: 44, h: 44 };
   zones = [
-    { id: 'Left Corner', x: 0, y: 430, ...zoneSize, type: '3pt' },
-    { id: 'Left Wing 3pt', x: 90, y: 210, ...zoneSize, type: '3pt' },
-    { id: 'Top of Key 3pt', x: 270, y: 150, ...zoneSize, type: '3pt' },
-    { id: 'Right Wing 3pt', x: 460, y: 210, ...zoneSize, type: '3pt' },
-    { id: 'Right Corner', x: 550, y: 430, ...zoneSize, type: '3pt' },
-    { id: 'Left Baseline', x: 90, y: 430, ...zoneSize, type: 'midrange' },
-    { id: 'Left Wing', x: 160, y: 280, ...zoneSize, type: 'midrange' },
-    { id: 'Free Throw', x: 270, y: 250, ...zoneSize, type: 'midrange' },
-    { id: 'Right Wing', x: 380, y: 280, ...zoneSize, type: 'midrange' },
-    { id: 'Right Baseline', x: 470, y: 430, ...zoneSize, type: 'midrange' }
+    // 3pt Zones
+    { id: 'Left Corner',        x: -5,   y: 430, ...zoneSize, type: '3pt' },
+    { id: 'Left Wing 3pt',      x: 90,  y: 220, ...zoneSize, type: '3pt' },
+    { id: 'Top of Key 3pt',     x: 270, y: 150, ...zoneSize, type: '3pt' },  
+    { id: 'Right Wing 3pt',     x: 460, y: 220, ...zoneSize, type: '3pt' },
+    { id: 'Right Corner',       x: 560, y: 430, ...zoneSize, type: '3pt' },
+
+    // Midrange Zones
+    { id: 'Left Baseline',      x: 90,  y: 430, ...zoneSize, type: 'midrange' },  // Moved down slightly
+    { id: 'Left Wing',          x: 150, y: 300, ...zoneSize, type: 'midrange' },  // Moved out left
+    { id: 'Free Throw',         x: 270, y: 250, ...zoneSize, type: 'midrange' },
+    { id: 'Right Wing',         x: 400, y: 300, ...zoneSize, type: 'midrange' },  // Moved out right
+    { id: 'Right Baseline',     x: 470, y: 430, ...zoneSize, type: 'midrange' }   // Moved down slightly
   ];
+  
 }
+
+
 
 export async function renderZonesChart(sessions) {
   if (!stage || !layer || !zones) {
@@ -66,6 +95,8 @@ export async function renderZonesChart(sessions) {
   const activeZoneTypes = new Set(sessions.map(s => s.zoneType));
   const visibleZones = zones.filter(z => activeZoneTypes.has(z.type));
 
+  const mode = window.hotZoneMode || '%';
+
   visibleZones.forEach(zone => {
     const { id, x, y, w, h } = zone;
     const { attempted = 0, made = 0 } = stats[id] || {};
@@ -77,10 +108,15 @@ export async function renderZonesChart(sessions) {
       stroke: '#fff', strokeWidth: 1, cornerRadius: 4
     });
 
+    let labelText = '';
+    if (mode === '%') labelText = `${Math.round(accuracy * 100)}%`;
+    else if (mode === 'made') labelText = `${made} made`;
+    else if (mode === 'attempted') labelText = `${attempted} att`;
+
     const label = new Konva.Text({
       x, y: y + h / 2 - 10, width: w,
       align: 'center',
-      text: `${Math.round(accuracy * 100)}%`,
+      text: labelText,
       fontSize: 12,
       fontStyle: 'bold',
       fill: '#fff',
@@ -91,15 +127,23 @@ export async function renderZonesChart(sessions) {
     });
 
     rect.on('mouseover', () => {
+      const percent = Math.round(accuracy * 100);
+      const text = `${made}/${attempted} made (${percent}%)`;
+      tooltipText.text(text);
+      tooltip.position({ x: x + w / 2, y: y - 10 });
+      tooltip.opacity(1);
+      tooltip.show();
+      layer.batchDraw();
       document.body.style.cursor = 'pointer';
       rect.opacity(0.6);
-      layer.draw();
     });
 
     rect.on('mouseout', () => {
+      tooltip.hide();
+      tooltip.opacity(0);
+      layer.batchDraw();
       document.body.style.cursor = 'default';
       rect.opacity(1);
-      layer.draw();
     });
 
     layer.add(rect);
@@ -110,12 +154,14 @@ export async function renderZonesChart(sessions) {
 }
 
 function getZoneColor(accuracy) {
-  if (accuracy == 0) return 'rgba(255, 0, 0, 0.6)';
-  if (accuracy < 0.25) return 'rgba(255, 0, 170, 0.6)';
-  if (accuracy < 0.5) return 'rgba(255, 174, 0, 0.79)';
-  if (accuracy < 0.75) return 'rgba(0, 255, 136, 0.86)';
-  return 'rgba(41, 252, 41, 0.8)';
+  if (accuracy === 0) return 'rgba(239, 68, 68, 0.9)';      // 🔴 Tailwind red-500
+  if (accuracy < 0.3) return 'rgba(244, 63, 94, 0.9)';       // 🌺 rose-500
+  if (accuracy < 0.5) return 'rgba(251, 191, 36, 0.9)';      // 🟧 amber-400
+  if (accuracy < 0.7) return 'rgba(163, 230, 53, 0.9)';      // 🟨 lime-400
+  if (accuracy < 0.9) return 'rgba(34, 197, 94, 0.9)';       // 🟩 green-500
+  return 'rgba(22, 163, 74, 0.95)';                          // ✅ green-600
 }
+
 
 function getZoneStatsFromSessions(sessions) {
   const totals = {};
