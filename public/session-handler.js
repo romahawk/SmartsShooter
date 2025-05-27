@@ -152,78 +152,98 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 async function loadSessionLog(uid) {
-    const q = query(collection(db, "sessions"), where("userId", "==", uid));
-    const snapshot = await getDocs(q);
+  const q = query(collection(db, "sessions"), where("userId", "==", uid));
+  const snapshot = await getDocs(q);
 
-    sessions = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+  sessions = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
 
-    const tbody = document.getElementById("sessionTableBody");
-    if (!tbody) return;
-    tbody.innerHTML = "";
+  // Apply sorting
+  if (sortField) {
+    sessions.sort((a, b) => {
+      let valA = a[sortField];
+      let valB = b[sortField];
 
-    sessions.forEach(session => {
-      const zoneLabel = session.zoneType ? session.zoneType.charAt(0).toUpperCase() + session.zoneType.slice(1) : "—";
-      const roundCount = session.rounds ? session.rounds.length : 0;
+      // Normalize for strings
+      if (typeof valA === "string") valA = valA.toLowerCase();
+      if (typeof valB === "string") valB = valB.toLowerCase();
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td class="px-4 py-2 whitespace-nowrap">${session.date}</td>
-        <td class="px-4 py-2 whitespace-nowrap">${session.trainingType || "—"}</td>
-        <td class="px-4 py-2 text-xs">${zoneLabel}</td>
-        <td class="px-4 py-2 text-center">${roundCount}</td>
-        <td class="px-4 py-2 text-center">${session.accuracy}%</td>
-        <td class="px-4 py-2 text-xs">${session.notes || ""}</td>
-        <td class="px-4 py-2 text-center">
-          <button class="text-blue-600 hover:underline" data-id="${session.id}" data-action="edit">Edit</button> |
-          <button class="text-red-600 hover:underline" data-id="${session.id}" data-action="delete">Delete</button>
-        </td>
-      `;
-      tbody.appendChild(row);
+      // Handle undefined/null
+      valA = valA ?? '';
+      valB = valB ?? '';
+
+      if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+      if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
     });
+  }
 
-    document.querySelectorAll('button[data-action="delete"]').forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-id");
-        if (confirm("Are you sure you want to delete this session?")) {
-          try {
-            await deleteDoc(doc(db, "sessions", id));
-            loadSessionLog(auth.currentUser.uid);
-          } catch (error) {
-            console.error("Error deleting session:", error);
-            alert("Failed to delete session.");
-          }
+  const tbody = document.getElementById("sessionTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  sessions.forEach(session => {
+    const zoneLabel = session.zoneType ? session.zoneType.charAt(0).toUpperCase() + session.zoneType.slice(1) : "—";
+    const roundCount = session.rounds ? session.rounds.length : 0;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td class="px-4 py-2 whitespace-nowrap">${session.date}</td>
+      <td class="px-4 py-2 whitespace-nowrap">${session.trainingType || "—"}</td>
+      <td class="px-4 py-2 text-xs">${zoneLabel}</td>
+      <td class="px-4 py-2 text-center">${roundCount}</td>
+      <td class="px-4 py-2 text-center">${session.accuracy}%</td>
+      <td class="px-4 py-2 text-xs">${session.notes || ""}</td>
+      <td class="px-4 py-2 text-center">
+        <button class="text-blue-600 hover:underline" data-id="${session.id}" data-action="edit">Edit</button> |
+        <button class="text-red-600 hover:underline" data-id="${session.id}" data-action="delete">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  // Rebind delete/edit listeners
+  document.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      if (confirm("Are you sure you want to delete this session?")) {
+        try {
+          await deleteDoc(doc(db, "sessions", id));
+          loadSessionLog(auth.currentUser.uid);
+        } catch (error) {
+          console.error("Error deleting session:", error);
+          alert("Failed to delete session.");
         }
-      });
+      }
     });
+  });
 
-    document.querySelectorAll('button[data-action="edit"]').forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-id");
-        const session = sessions.find(s => s.id === id);
-        if (!session) {
-          console.warn("Session not found for ID:", id);
-          return;
-        }
+  document.querySelectorAll('button[data-action="edit"]').forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const session = sessions.find(s => s.id === id);
+      if (!session) return;
 
-        document.getElementById("editSessionId").value = session.id;
-        document.getElementById("editDate").value = session.date;
-        document.getElementById("editTrainingType").value = session.trainingType;
-        document.getElementById("editZoneType").value = session.zoneType;
-        document.getElementById("editZoneType").dispatchEvent(new Event("change"));
-        document.getElementById("editRoundCount").value = session.rounds?.length || 1;
-        document.getElementById("editNotes").value = session.notes || "";
+      // Fill modal with session data...
+      document.getElementById("editSessionId").value = session.id;
+      document.getElementById("editDate").value = session.date;
+      document.getElementById("editTrainingType").value = session.trainingType;
+      document.getElementById("editZoneType").value = session.zoneType;
+      document.getElementById("editZoneType").dispatchEvent(new Event("change"));
+      document.getElementById("editRoundCount").value = session.rounds?.length || 1;
+      document.getElementById("editNotes").value = session.notes || "";
 
-        const zoneNames = zoneMap[session.zoneType] || [];
-        session.rounds?.forEach((round, i) => {
-          zoneNames.forEach(zone => {
-            const attemptedInput = document.querySelector(`[name="edit_round_${i + 1}_attempted_${zone}"]`);
-            const madeInput = document.querySelector(`[name="edit_round_${i + 1}_made_${zone}"]`);
-            if (attemptedInput) attemptedInput.value = round[zone]?.attempted || 0;
-            if (madeInput) madeInput.value = round[zone]?.made || 0;
-          });
+      const zoneNames = zoneMap[session.zoneType] || [];
+      session.rounds?.forEach((round, i) => {
+        zoneNames.forEach(zone => {
+          const attemptedInput = document.querySelector(`[name="edit_round_${i + 1}_attempted_${zone}"]`);
+          const madeInput = document.querySelector(`[name="edit_round_${i + 1}_made_${zone}"]`);
+          if (attemptedInput) attemptedInput.value = round[zone]?.attempted || 0;
+          if (madeInput) madeInput.value = round[zone]?.made || 0;
         });
-
-        document.getElementById("editModal").classList.remove("hidden");
       });
+
+      document.getElementById("editModal").classList.remove("hidden");
     });
+  });
 }
+
