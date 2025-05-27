@@ -125,9 +125,14 @@
    </div>
    <!-- 📋 Training Session Log (Table) -->
    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col w-full">
-    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-     📋 Training Session Log
-    </h2>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+       📋 Training Session Log
+      </h2>
+      <button id="exportCsvBtn" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+  📤 Export to CSV
+</button>
+    </div>
     <div class="overflow-x-auto w-full">
      <table class="min-w-full w-full text-sm text-left border border-gray-300">
       <thead class="bg-gray-100 text-xs uppercase font-bold">
@@ -157,6 +162,7 @@
        <!-- table rows injected here -->
       </tbody>
      </table>
+
     </div>
    </div>
    <!-- 📊 Right: SmartShooter Training Log (Chart + Filters) -->

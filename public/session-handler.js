@@ -60,6 +60,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadSessionLog(uid);
   });
+
+  document.getElementById("exportCsvBtn").addEventListener("click", () => {
+  if (!sessions || sessions.length === 0) {
+    alert("No sessions to export.");
+    return;
+  }
+
+  const headers = ["Date", "Training Type", "Zone Type", "Rounds", "Accuracy", "Notes"];
+  const rows = sessions.map(s => [
+    s.date,
+    s.trainingType || "",
+    s.zoneType || "",
+    s.rounds?.length || 0,
+    s.accuracy + "%",
+    `"${(s.notes || "").replace(/"/g, '""')}"`
+  ]);
+
+  const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `training_sessions_${new Date().toISOString().split("T")[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
 });
 
 function updateSortIndicators() {
