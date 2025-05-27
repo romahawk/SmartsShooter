@@ -103,7 +103,16 @@ function updateSortIndicators() {
 async function handleFormSubmit(e, uid) {
   e.preventDefault();
   const form = e.target;
+
+  // Get form fields
   const { date, trainingType, zoneType, notes } = Object.fromEntries(new FormData(form));
+
+  // Validate required fields
+  if (!date || !trainingType || !zoneType) {
+    alert("Please fill in date, training type, and zone type.");
+    return;
+  }
+
   const roundCount = parseInt(document.getElementById("roundCount")?.value || 1);
   const zoneNames = zoneMap[zoneType] || [];
   const rounds = buildRounds("round", roundCount, zoneNames);
@@ -112,16 +121,29 @@ async function handleFormSubmit(e, uid) {
 
   try {
     await addDoc(collection(db, "sessions"), {
-      userId: uid, date, trainingType, zoneType, rounds, accuracy: Number(accuracy), notes, timestamp: new Date()
+      userId: uid,
+      date,
+      trainingType,
+      zoneType,
+      rounds,
+      accuracy: Number(accuracy),
+      notes: notes || "",
+      timestamp: new Date()
     });
+
     alert("Session saved!");
     form.reset();
+
+    // Optionally restore today's date
+    document.getElementById("date").valueAsDate = new Date();
+
     loadSessionLog(uid);
   } catch (error) {
     alert("Failed to save session: " + error.message);
     console.error("Firestore error:", error);
   }
 }
+
 
 async function handleEditSubmit(e, uid) {
   e.preventDefault();
